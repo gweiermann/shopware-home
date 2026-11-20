@@ -52,10 +52,6 @@ this autonomy.
    failures. Get proof for each fix before you push it.
 6. **Stop at the gate.** See "Handoff".
 
-Stay active from step 1 to step 6. If you end your turn while checks are
-pending, the work stops, because nobody prompts you again. Wait with the
-watcher from `babysit-pr`, so something wakes you when the PR changes.
-
 ## Proof
 
 Proof is evidence you observed yourself in this session: command output, a
