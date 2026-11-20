@@ -54,7 +54,7 @@ link() {
 
 [ "$DRY" = 1 ] || mkdir -p "$AGENTS_SKILLS" "$CLAUDE_SKILLS" "$BIN"
 
-for skill_md in "$HOME_REPO"/skills/*/SKILL.md "$HOME_REPO"/general/skills/*/SKILL.md "$HOME_REPO"/general/skills/*/*/SKILL.md; do
+for skill_md in "$HOME_REPO"/skills/*/SKILL.md "$HOME_REPO"/general/skills/*/SKILL.md; do
     [ -f "$skill_md" ] || continue
     dir=$(dirname "$skill_md")
     name=$(basename "$dir")
