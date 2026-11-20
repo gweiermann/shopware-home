@@ -1,0 +1,198 @@
+#!/usr/bin/env bash
+#
+# shopware-instance — update or reset a local Shopware instance without
+# reinstalling dependencies that some instance already installed once.
+#
+# Run on the host, from the instance root (its docker compose project dir).
+#
+#   shopware-instance deps                 vendor/ (composer update) and every node_modules
+#   shopware-instance update               cache clear + deps + migrations
+#   shopware-instance reset [--no-demodata]
+#                                          cache clear + deps + `composer setup` minus its
+#                                          installs + demodata. Wipes the database.
+#
+# vendor/ and each node_modules come from a store keyed by their lockfile:
+#
+#   ~/.shopware-nm/<sha256(lockfile):12>/node_modules     (attach.sh reads the same store)
+#   ~/.shopware-nm/<sha256(composer.lock):12>/vendor
+#
+# A hit is an APFS clonefile: seconds, no extra disk. A miss runs the real install
+# once and parks the result for every other instance and worktree. A node_modules
+# counts as matching only if npm-tree-matches-lock says so, both in the instance
+# and in the store; the lockfile hash alone also matches a tree installed from an
+# older lock.
+#
+# Every step prints its duration; SHOPWARE_INSTANCE_TIMINGS=<file> also appends
+# them there as TSV.
+set -euo pipefail
+
+# Nothing here reads input, and a background run whose children touch the
+# terminal gets them job-control stopped (SIGTTIN) indefinitely.
+exec </dev/null
+
+ADMIN=src/Administration/Resources/app/administration
+STOREFRONT=src/Storefront/Resources/app/storefront
+ACCEPTANCE=tests/acceptance
+STORE=${SHOPWARE_NM_STORE:-$HOME/.shopware-nm}
+MATCHES_LOCK="$(cd -P "$(dirname "$0")/.." && pwd)/general/skills/worktree-attach/scripts/npm-tree-matches-lock"
+
+die() { printf 'shopware-instance: %s\n' "$*" >&2; exit 1; }
+
+[ -f compose.yaml ] && [ -f composer.json ] || die "run this from a Shopware instance root"
+
+in_web() { docker compose exec -T web bash -c "$1"; }
+
+# Runs "$@" and prints how long it took, e.g. `[  41s] npm admin: restored`.
+# The command may set STEP_NOTE to say what it actually did.
+timed() {
+    local label=$1; shift
+    local start=$SECONDS
+    STEP_NOTE=""
+    "$@"
+    local took=$((SECONDS - start))
+    printf '[%4ss] %s%s\n' "$took" "$label" "${STEP_NOTE:+: $STEP_NOTE}"
+    [ -z "${SHOPWARE_INSTANCE_TIMINGS:-}" ] \
+        || printf '%s\t%s\t%s\n' "$label" "$took" "$STEP_NOTE" >> "$SHOPWARE_INSTANCE_TIMINGS"
+}
+
+key_of() { shasum -a 256 "$1" | cut -c1-12; }
+
+# Copy-on-write clone of a whole tree via APFS clonefile(2), one syscall.
+clone_tree() {
+    python3 -c '
+import ctypes, ctypes.util, sys
+libc = ctypes.CDLL(ctypes.util.find_library("c"), use_errno=True)
+libc.clonefile.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int]
+sys.exit(0 if libc.clonefile(sys.argv[1].encode(), sys.argv[2].encode(), 0) == 0 else 1)
+' "$1" "$2" 2>/dev/null || cp -Rc "$1" "$2"
+}
+
+# Moves a tree out of the way instantly and deletes it in the background, so a
+# 1 GB node_modules never blocks the restore that replaces it.
+drop_tree() {
+    [ -e "$1" ] || return 0
+    mkdir -p "$STORE/.trash"
+    mv "$1" "$(mktemp -d "$STORE/.trash/XXXXXX")/"
+    (nohup rm -rf "$STORE/.trash"/* >/dev/null 2>&1 &)
+}
+
+# Where the store keeps <tree name> for exactly this lockfile.
+store_entry() { echo "$STORE/$(key_of "$1")/$2"; }
+
+# Parks a clone of <tree> as <entry>, unless another run parked one first.
+park() {
+    local tree=$1 entry=$2 tmp
+    [ -d "$entry" ] && return 0
+    mkdir -p "$(dirname "$entry")"
+    tmp=$(mktemp -d "$(dirname "$entry")/.parking-XXXXXX")
+    clone_tree "$tree" "$tmp/tree"
+    mv -n "$tmp/tree" "$entry" 2>/dev/null || true
+    rm -rf "$tmp"
+}
+
+# npm_tree <package dir> <composer npm script> <ci|install>
+# On a miss, `ci` installs from scratch and `install` updates the existing tree in place.
+npm_tree() {
+    local dir=$1 script=$2 miss=$3
+    local tree="$dir/node_modules" lock="$dir/package-lock.json" entry
+    entry=$(store_entry "$lock" node_modules)
+
+    if "$MATCHES_LOCK" "$tree" "$lock" 2>/dev/null; then
+        park "$tree" "$entry"
+        STEP_NOTE="already matches the lock"
+        return
+    fi
+    if [ -d "$entry" ]; then
+        if "$MATCHES_LOCK" "$entry" "$lock" 2>/dev/null; then
+            drop_tree "$tree"
+            clone_tree "$entry" "$tree"
+            STEP_NOTE="restored from store $(basename "$(dirname "$entry")")"
+            return
+        fi
+        drop_tree "$entry"
+        STEP_NOTE="stale store entry discarded, "
+    fi
+
+    if [ "$miss" = install ] && [ -d "$tree" ]; then
+        in_web "composer $script install --no-audit --prefer-offline"
+        STEP_NOTE+="npm install"
+    else
+        drop_tree "$tree"
+        in_web "composer $script clean-install --no-audit --prefer-offline"
+        STEP_NOTE+="npm ci"
+    fi
+    # npm install may rewrite the lockfile, so key on the one it left behind.
+    entry=$(store_entry "$lock" node_modules)
+    if "$MATCHES_LOCK" "$tree" "$lock"; then
+        park "$tree" "$entry"
+        STEP_NOTE+=" + parked"
+    else
+        STEP_NOTE+=", not parked: the tree does not match the lock"
+    fi
+}
+
+# Seeds a missing vendor/ from the store, then lets `composer update` do the rest:
+# on an existing vendor/ it only installs what changed. composer.lock is
+# gitignored, so a fresh clone resolves once before it has a key to look up.
+# No `-o`: the optimized classmap scans all of src/ and costs ~1 min per run.
+composer_vendor() {
+    local entry
+    STEP_NOTE="composer update"
+    if [ ! -f vendor/autoload.php ]; then
+        [ -f composer.lock ] || in_web 'composer update --no-install --no-scripts --no-interaction'
+        entry=$(store_entry composer.lock vendor)
+        if [ -d "$entry" ]; then
+            drop_tree vendor
+            clone_tree "$entry" vendor
+            STEP_NOTE="restored from store $(basename "$(dirname "$entry")") + composer update"
+        fi
+    fi
+    in_web 'composer update --no-interaction'
+    park vendor "$(store_entry composer.lock vendor)"
+}
+
+storefront_link() { in_web "cd $STOREFRONT && node build/link-component-node-modules.js"; }
+
+deps() {
+    local miss=$1
+    timed "composer"           composer_vendor
+    timed "npm admin"          npm_tree "$ADMIN" npm:admin "$miss"
+    timed "npm storefront"     npm_tree "$STOREFRONT" npm:storefront "$miss"
+    timed "storefront link"    storefront_link
+    timed "npm acceptance"     npm_tree "$ACCEPTANCE" npm:acceptance "$miss"
+}
+
+clear_cache() { in_web 'rm -rf var/cache'; }
+
+# Mirrors composer.json's `setup` script, minus the installs deps() already did.
+setup_rest() {
+    timed "translation meta"   in_web 'mkdir -p custom/plugins && composer translation:metadata:delete'
+    timed "init db"            in_web 'composer init:db'
+    timed "extension npm"      in_web 'export PROJECT_ROOT="$PWD"; bin/install-extension-npm'
+    timed "build admin"        in_web 'composer build:js:admin'
+    timed "build storefront"   in_web 'composer build:js:storefront'
+    timed "theme change"       in_web 'php bin/console theme:change --sync --all Storefront'
+    timed "extension tooling"  in_web 'composer admin:setup-extension-tooling -- --if-enabled'
+}
+
+total_start=$SECONDS
+case "${1:-}" in
+    deps)
+        deps install
+        ;;
+    update)
+        timed "cache clear"    clear_cache
+        deps install
+        timed "migrate"        in_web 'bin/console database:migrate --all'
+        ;;
+    reset)
+        timed "cache clear"    clear_cache
+        deps ci
+        setup_rest
+        [ "${2:-}" = --no-demodata ] || timed "demodata" in_web 'APP_ENV=prod bin/console framework:demodata'
+        ;;
+    *)
+        sed -n '2,25p' "$0"; exit 1
+        ;;
+esac
+printf '[%4ss] total\n' "$((SECONDS - total_start))"

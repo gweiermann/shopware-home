@@ -1,0 +1,4 @@
+interface:
+  display_name: "Shopware Breaking Changes"
+  short_description: "Decide if a change is breaking, with origin/trunk as the only baseline."
+  default_prompt: "Check whether this change is a breaking change against origin/trunk."

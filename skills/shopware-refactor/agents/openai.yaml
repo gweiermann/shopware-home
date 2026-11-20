@@ -1,0 +1,4 @@
+interface:
+  display_name: "Shopware Refactor"
+  short_description: "Refactor aggressively for SLAP and readability, without changing behaviour."
+  default_prompt: "Refactor this Shopware code for readability and single level of abstraction."

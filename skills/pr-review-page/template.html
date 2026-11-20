@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PR 00000 review</title>
+<style>
+  /* The palette of the Claude Code chat: soft dark grey, off-white text, outlined blocks. */
+  :root {
+    --bg: #1f1f1f;
+    --text: #e8e8e6;
+    --muted: #a8a8a6;
+    --border: #353535;
+    --block: #1f1f1f;
+    --inline-code: #2b2b2b;
+    --link: #9cc2ff;
+    --focus: #9cc2ff;
+    --high-bg: #3a2323; --high-fg: #f2a9a3;
+    --medium-bg: #362d1b; --medium-fg: #e8c47e;
+    --low-bg: #213326; --low-fg: #a3d9ac;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  main { max-width: 960px; margin: 0 auto; padding: 32px 16px 64px; }
+  header p { margin: 4px 0; color: var(--muted); }
+  h1 { font-size: 1.6rem; margin: 0 0 8px; }
+  h2 { font-size: 1.25rem; margin: 40px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 1rem; margin: 20px 0 8px; }
+  a { color: var(--link); }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+  code, pre, .block { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.9375rem; }
+  code { background: var(--inline-code); padding: 1px 5px; border-radius: 4px; }
+  pre, .block {
+    display: block;
+    background: var(--block);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 24px;
+    margin: 12px 0;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  pre code { background: none; padding: 0; }
+
+  details { margin: 12px 0; }
+  details > summary { cursor: pointer; list-style: none; }
+  details > summary::-webkit-details-marker { display: none; }
+  .toggle { display: inline-block; margin: 0 0 4px; color: var(--link); font-size: 0.875rem; }
+  .toggle::before { content: "▸ "; }
+  details[open] .toggle::before { content: "▾ "; }
+  .toggle .when-open { display: none; }
+  details[open] .toggle .when-open { display: inline; }
+  details[open] .toggle .when-closed { display: none; }
+
+  .finding-link { display: block; margin: 12px 0 20px; color: inherit; text-decoration: none; }
+  .finding-link .block { margin-bottom: 4px; }
+  .finding-link:hover .block { border-color: var(--link); }
+  .finding-link .open { color: var(--link); font-size: 0.875rem; text-decoration: underline; }
+
+  /* Each finding is a subpage of the same file: its #id in the URL shows it instead of the report. */
+  .subpage { display: none; scroll-margin-top: 32px; }
+  .subpage:target { display: block; }
+  body:has(.subpage:target) .report { display: none; }
+  .back { display: inline-block; margin-bottom: 16px; font-size: 0.875rem; }
+
+  /* An animation replays whenever an element leaves display: none, so each switch slides in from its side. */
+  .subpage:target { animation: enter-from-right 320ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .report { animation: enter-from-left 320ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+  @keyframes enter-from-right {
+    from { opacity: 0; transform: translateX(48px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes enter-from-left {
+    from { opacity: 0; transform: translateX(-48px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes fade {
+    from { opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .subpage:target, .report { animation: fade 160ms ease-out; }
+  }
+  .section > summary h2 { display: inline; border: none; }
+  .section > summary { margin-top: 40px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+  .badge { display: inline-block; padding: 0 8px; border-radius: 999px; font-weight: 600; font-family: inherit; }
+  .badge.high { background: var(--high-bg); color: var(--high-fg); }
+  .badge.medium { background: var(--medium-bg); color: var(--medium-fg); }
+  .badge.low { background: var(--low-bg); color: var(--low-fg); }
+
+  figure { margin: 16px 0; }
+  figure img { max-width: 100%; height: auto; border: 1px solid var(--border); border-radius: 12px; }
+  figcaption { color: var(--muted); font-size: 0.875rem; }
+  ul, ol { padding-left: 1.4em; }
+</style>
+</head>
+<body>
+<main>
+
+<div class="report">
+
+<header>
+  <h1>PR 00000 review: <!-- PR title --></h1>
+  <p><a href="https://github.com/shopware/shopware/pull/00000">shopware/shopware#00000</a> · head <code>0000000</code> · reviewed 2026-01-01</p>
+</header>
+
+<h2>What's new</h2>
+<p><!-- 2–4 sentences --></p>
+
+<h2>Impact and blast radius</h2>
+<ul>
+  <li><strong>Public API:</strong> none</li>
+  <li><strong>Breaking changes:</strong> none</li>
+  <li><strong>Affected:</strong> …</li>
+  <li><strong>Risk:</strong> low. One sentence why.</li>
+</ul>
+
+<h2 id="findings">Findings in this PR</h2>
+
+<!-- One link per finding, sorted like the chat report. Its subpage sits after the report. -->
+<a class="finding-link" href="#finding-1">
+  <span class="block">1. Short title  ·  <span class="badge low">Low</span> · confirmed
+   When &lt;who or which condition&gt;:
+   - &lt;what the system does&gt;
+   - &lt;what the user sees&gt;
+   Suggestion: &lt;fix&gt;</span>
+  <span class="open">Open reproduction and evidence →</span>
+</a>
+<h2>Implementation details</h2>
+<!-- One block per shift. -->
+<pre class="block">1. The shift in a few words
+   Before: how it worked
+   After:  how it works now</pre>
+
+<h2>Before merge</h2>
+<ul>
+  <li>…</li>
+</ul>
+
+<details class="section">
+  <summary><h2>Out of scope</h2> <span class="toggle"><span class="when-closed">Show</span><span class="when-open">Hide</span></span></summary>
+  <ul>
+    <li>… <a href="#">link</a></li>
+  </ul>
+</details>
+
+
+</div>
+
+<!-- One subpage per finding: the same text block on top, then everything that backs it. -->
+<section class="subpage" id="finding-1" aria-labelledby="finding-1-title">
+  <a class="back" href="#findings">← Back to the report</a>
+  <h2 id="finding-1-title">Finding 1 · Short title</h2>
+  <span class="block">1. Short title  ·  <span class="badge low">Low</span> · confirmed
+   When &lt;who or which condition&gt;:
+   - &lt;what the system does&gt;
+   - &lt;what the user sees&gt;
+   Suggestion: &lt;fix&gt;</span>
+  <h3>Reproduction</h3>
+  <ol>
+    <li>Setup: …</li>
+    <li>…</li>
+  </ol>
+  <h3>Evidence</h3>
+  <p><a href="https://github.com/shopware/shopware/blob/0000000/path/to/file.ts#L83">path/to/file.ts:83</a></p>
+  <pre><code>// the quoted lines</code></pre>
+  <h3>Suggested fix</h3>
+  <pre><code>// the replacement lines</code></pre>
+  <figure>
+    <img src="/absolute/path/1-step.png" alt="What the red marker shows">
+    <figcaption>1 · step: what the red marker shows</figcaption>
+  </figure>
+  <a class="back" href="#findings">← Back to the report</a>
+</section>
+
+</main>
+</body>
+</html>

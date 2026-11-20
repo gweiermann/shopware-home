@@ -1,0 +1,4 @@
+interface:
+  display_name: "Full Stop"
+  short_description: "Prove, review, and babysit a draft PR without merging"
+  default_prompt: "Use $full-stop to take this to a green, reviewed draft PR. I am not watching this thread."

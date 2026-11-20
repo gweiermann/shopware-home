@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Devboard</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='4' fill='%231a6cff'/><path d='M5 5.5 2.8 8 5 10.5M11 5.5 13.2 8 11 10.5' stroke='white' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<style>
+:root {
+  --bg: #f4f5f7; --card: #ffffff; --text: #171a21; --muted: #697186; --faint: #a3a9b7;
+  --line: #e6e8ee; --hover: #f6f7fa; --accent: #1a6cff; --accent-soft: #e8f0ff;
+  --up: #1f9d55; --down: #d64545; --down-soft: #fdecec;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #101318; --card: #191d24; --text: #e7eaf0; --muted: #8e96a8; --faint: #5d6575;
+    --line: #272c36; --hover: #1f242c; --accent: #6ea1ff; --accent-soft: #1d2a42;
+    --up: #3ecf7a; --down: #ff6b6b; --down-soft: #3a1f22;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+code { font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
+a { color: inherit; text-decoration: none; }
+main { max-width: 920px; margin: 0 auto; padding: 28px 16px 64px; }
+
+.top { display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; }
+.top h1 { font-size: 18px; margin: 0; }
+.summary { color: var(--muted); }
+.updated { margin-left: auto; color: var(--faint); font-size: 12px; white-space: nowrap; }
+.banner { background: var(--down-soft); color: var(--down); border-radius: 8px; padding: 8px 12px; margin-bottom: 16px; }
+.empty-state { color: var(--muted); padding: 40px 0; text-align: center; }
+
+.instance { background: var(--card); border: 1px solid var(--line); border-radius: 12px; margin-bottom: 16px; }
+.head { display: flex; gap: 16px; align-items: flex-start; padding: 16px 18px; }
+.head h2 { font-size: 16px; margin: 0; display: flex; align-items: center; gap: 8px; }
+.head .about { margin-top: 2px; }
+.grow { flex: 1; min-width: 0; }
+
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--up); flex: none; }
+.dot.down { background: var(--down); }
+.badge-down { font-size: 11px; font-weight: 600; color: var(--down); background: var(--down-soft);
+  border-radius: 999px; padding: 1px 8px; }
+
+.section-label { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--faint); padding: 12px 18px 4px; border-top: 1px solid var(--line); }
+.section-label:has(.none) { padding-bottom: 12px; }
+.none { font-weight: 400; letter-spacing: 0; text-transform: none; }
+
+.item { display: flex; gap: 16px; align-items: center; padding: 10px 18px; }
+.item:hover { background: var(--hover); }
+.item:last-child { border-radius: 0 0 12px 12px; }
+.item .meta { margin-top: 4px; }
+
+.about { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.subject { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.about code.title { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; color: var(--muted); font-size: 12px; }
+.meta code { color: var(--muted); }
+
+.serve { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600;
+  color: var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 2px 8px; }
+.serve:hover { text-decoration: underline; }
+.serve.down { color: var(--down); background: var(--down-soft); }
+.pr { color: var(--accent); font-weight: 500; }
+.pr:hover { text-decoration: underline; }
+
+.tools { display: flex; gap: 4px; flex: none; }
+.btn { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 6px;
+  border: 1px solid var(--line); background: var(--card); color: var(--text); font: inherit; font-size: 12px; cursor: pointer; }
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn.icon { width: 28px; padding: 0; justify-content: center; }
+.btn svg, .edit svg { width: 14px; height: 14px; }
+
+.edit { border: 0; background: none; color: var(--faint); cursor: pointer; padding: 2px 4px; border-radius: 4px;
+  font: inherit; font-size: 12px; display: inline-flex; align-items: center; flex: none; opacity: 0; }
+.head:hover .edit, .item:hover .edit, .edit:focus-visible { opacity: 1; }
+.edit:hover { color: var(--accent); background: var(--accent-soft); }
+.subject-input { width: 100%; max-width: 520px; font: inherit; font-weight: 600; color: var(--text); background: var(--card);
+  border: 1px solid var(--accent); border-radius: 6px; padding: 3px 8px; outline: none; }
+
+details { border-top: 1px solid var(--line); }
+summary { padding: 10px 18px; color: var(--muted); cursor: pointer; font-size: 13px; list-style: none; }
+summary::-webkit-details-marker { display: none; }
+summary::before { content: ""; display: inline-block; width: 5px; height: 5px; margin: 0 9px 2px 1px;
+  border: solid var(--faint); border-width: 0 1.5px 1.5px 0; transform: rotate(-45deg); transition: transform .15s; }
+details[open] summary::before { transform: rotate(45deg); }
+details .item { padding-top: 6px; padding-bottom: 6px; }
+details .item .meta { display: none; }
+details .item .tools { opacity: 0; }
+details .item:hover .tools, details .item:focus-within .tools { opacity: 1; }
+
+@media (max-width: 600px) {
+  .head, .item { flex-wrap: wrap; }
+  .tools { width: 100%; }
+  details .item { flex-wrap: nowrap; }
+  details .item .tools { width: auto; }
+}
+@media (hover: none) {
+  .edit, details .item .tools { opacity: .6; }
+}
+</style>
+</head>
+<body>
+<main>
+  <div class="top"><h1>Devboard</h1><span class="summary" id="summary"></span><span class="updated" id="updated"></span></div>
+  <div id="banner"></div>
+  <div id="board"><p class="empty-state">Scanning containers…</p></div>
+</main>
+<script>
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const svg = (d) => `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const icon = {
+  code: svg('<path d="M5.5 4 2 8l3.5 4M10.5 4 14 8l-3.5 4"/>'),
+  external: svg('<path d="M9.5 2.5h4v4M13.5 2.5 7.5 8.5M12 9.5V13H3V4h3.5"/>'),
+  edit: svg('<path d="M10.5 2.5l3 3-8 8H2.5v-3z"/>'),
+};
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+const prNumber = (url) => url.split('/').pop();
+
+function editButton(c) {
+  return c.subject
+    ? `<button class="edit" data-path="${esc(c.path)}" data-subject="${esc(c.subject)}" title="Edit subject">${icon.edit}</button>`
+    : `<button class="edit add" data-path="${esc(c.path)}" data-subject="" title="Say what this checkout is about">+ subject</button>`;
+}
+
+// The subject is the headline. Without one, a worktree falls back to its folder
+// name (Claude names it after the task) and an instance to its branch.
+const fallback = (c) => c.isInstance ? c.branch : c.name;
+
+function about(c) {
+  const headline = c.subject
+    ? `<span class="subject" title="${esc(c.subject)}">${esc(c.subject)}</span>`
+    : `<code class="title" title="${esc(fallback(c))}">${esc(fallback(c))}</code>`;
+  return `<div class="about">${headline}${editButton(c)}</div>`;
+}
+
+function meta(c, ...lead) {
+  const parts = [...lead];
+  if (c.subject || fallback(c) !== c.branch) parts.push(`<code>${esc(c.branch)}</code>`);
+  if (c.pr) parts.push(`<a class="pr" href="${esc(c.pr)}" target="_blank">#${esc(prNumber(c.pr))}</a>`);
+  return parts.length ? `<div class="meta">${parts.join('')}</div>` : '';
+}
+
+const vscode = (c) => `<a class="btn" href="${esc(c.vscode)}" title="Open this checkout in VS Code">${icon.code} VS Code</a>`;
+
+function serverLink(s) {
+  const label = s.kind[0].toUpperCase() + s.kind.slice(1);
+  return `<a class="serve ${s.up ? '' : 'down'}" href="${esc(s.url)}" target="_blank" title="${esc(s.url)}">
+    ${label} :${s.port}${s.up ? '' : ' · not responding'} ${icon.external.replace('<svg', '<svg width="11" height="11"')}</a>`;
+}
+
+function devServer(c) {
+  return `<div class="item">
+    <div class="grow">${about(c)}${meta(c, ...c.servers.map(serverLink))}</div>
+    <div class="tools">${vscode(c)}</div>
+  </div>`;
+}
+
+function idleWorktree(c) {
+  return `<div class="item"><div class="grow">${about(c)}</div><div class="tools">${vscode(c)}</div></div>`;
+}
+
+function instanceCard(i) {
+  const idle = [...i.idle].sort((a, b) => (b.subject ? 1 : 0) - (a.subject ? 1 : 0) || a.name.localeCompare(b.name));
+  return `<section class="instance">
+    <div class="head">
+      <div class="grow">
+        <h2><span class="dot ${i.up ? '' : 'down'}"></span>${esc(i.host)}${i.up ? '' : '<span class="badge-down">not responding</span>'}</h2>
+        ${about({ ...i, isInstance: true })}${meta({ ...i, isInstance: true })}
+      </div>
+      <div class="tools">
+        <a class="btn" href="${esc(i.url)}" target="_blank">Admin ${icon.external}</a>
+        <a class="btn" href="http://${esc(i.host)}/" target="_blank">Storefront ${icon.external}</a>
+        ${vscode(i)}
+      </div>
+    </div>
+    ${i.devServers.length
+      ? `<div class="section-label">Dev servers</div>${i.devServers.map(devServer).join('')}`
+      : '<div class="section-label">Dev servers <span class="none">· none running</span></div>'}
+    ${idle.length ? `<details data-key="${esc(i.root)}"><summary>${plural(idle.length, 'other worktree')}</summary>${idle.map(idleWorktree).join('')}</details>` : ''}
+  </section>`;
+}
+
+const openDetails = new Set();
+
+async function refresh() {
+  if (document.querySelector('.subject-input')) return;
+  document.querySelectorAll('details').forEach((d) => d.open ? openDetails.add(d.dataset.key) : openDetails.delete(d.dataset.key));
+  let instances;
+  try {
+    instances = await fetch('/api/instances').then((r) => r.json());
+    document.getElementById('banner').innerHTML = '';
+  } catch {
+    document.getElementById('banner').innerHTML = '<div class="banner">Lost connection to the devboard server.</div>';
+    return;
+  }
+  const servers = instances.reduce((n, i) => n + i.devServers.reduce((m, c) => m + c.servers.length, 0), 0);
+  document.getElementById('summary').textContent = `${plural(instances.length, 'instance')} · ${plural(servers, 'dev server')}`;
+  document.getElementById('board').innerHTML = instances.length
+    ? instances.map(instanceCard).join('')
+    : '<p class="empty-state">No running instances.</p>';
+  document.querySelectorAll('details').forEach((d) => { d.open = openDetails.has(d.dataset.key); });
+  document.getElementById('updated').textContent = 'updated ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
+async function saveSubject(path, subject) {
+  await fetch('/api/subject', { method: 'POST', body: JSON.stringify({ path, subject }) });
+}
+
+document.addEventListener('click', (event) => {
+  const button = event.target.closest('.edit');
+  if (!button) return;
+  const input = document.createElement('input');
+  input.className = 'subject-input';
+  input.value = button.dataset.subject;
+  input.placeholder = 'What is this about? e.g. #20925 dropdown flicker in sw-select';
+  let done = false;
+  const finish = async (save) => {
+    if (done) return;
+    done = true;
+    if (save && input.value.trim() !== button.dataset.subject) await saveSubject(button.dataset.path, input.value);
+    input.remove();
+    refresh();
+  };
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') finish(true);
+    if (e.key === 'Escape') finish(false);
+  });
+  input.addEventListener('blur', () => finish(true));
+  button.closest('.about').replaceChildren(input);
+  input.focus();
+});
+
+refresh();
+setInterval(refresh, 10000);
+</script>
+</body>
+</html>
