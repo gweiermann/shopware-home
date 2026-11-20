@@ -9,7 +9,7 @@ license: MIT
 When you are asked to create a pr:
 - make it a draft
 - Assignee: @me
-- Labels: the user's team labels from `~/.agents/babysit/preferences.md` (e.g. `domain/framework` + `component/administration`), when they exist in the repository.
+- Labels: the user's team labels from `~/.agents/shopware-home/preferences.md` (e.g. `domain/framework` + `component/administration`), when they exist in the repository.
   No saved labels ⇒ ask once and offer to save them.
 
 ## Procedure

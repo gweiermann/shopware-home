@@ -36,15 +36,25 @@ Third-party skills worth having, installed from their source rather than copied 
 npx skills add mattpocock/skills    # grilling, tdd, diagnosing-bugs, writing-for-agents, …
 ```
 
-## Reaching this repo from a session
+## Where sessions start
 
-Sessions usually start in a worktree of `shopware/shopware`, where this repo's `AGENTS.md` is not loaded.
-One line in the global agent instructions (`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`) makes it reachable:
+Start sessions in this repo, in its main checkout; it needs no worktrees of its own.
+Code work happens in worktrees of the other repos, which the agent creates and attaches (`shopware-worktree-dev`).
+
+What that changes, because the harness loads configuration from the session's directory only:
+
+- **Memory** is keyed by git repository, so this repo starts with an empty one.
+  Keep the memory you have: `"autoMemoryDirectory": "~/.claude/projects/<the old repo's slug>/memory"` in this repo's `.claude/settings.local.json` (gitignored, per machine).
+- **A repo's own instructions** (`AGENTS.md`, `.claude/rules/`, project settings and hooks) do not load from here; `AGENTS.md` tells the agent to read them before changing code.
+  A Claude Code session can also move into the worktree (`/cd`, or the `EnterWorktree` tool), which loads its configuration fully.
+- **User-level** instructions, rules (`~/.claude/rules/`), settings and hooks load everywhere, as before.
+
+Sessions that still start inside a repo reach this one through a line in the global instructions (`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`):
 
 ```md
-Shopware home (repos, setup, Shopware specifics for reviewing, running and babysitting PRs): ~/Documents/shopware-home/AGENTS.md
+Shopware home (repos, setup, Shopware specifics for running, reviewing and babysitting PRs): ~/Documents/shopware-home/AGENTS.md
 ```
 
 ## Personal context
 
-Personal rules, preferences and per-repo patches stay out of this repo: in the global instruction files, the harness's memory, and `~/.agents/babysit/preferences.md` for the PR skills.
+Personal rules, preferences and per-repo patches stay out of this repo: in the global instruction files, the harness's memory, `~/.agents/babysit/preferences.md` for the PR skills, and `~/.agents/shopware-home/preferences.md` for the instances.

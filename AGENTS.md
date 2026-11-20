@@ -9,6 +9,7 @@ New here, or something below is missing on this machine: `/setup-home` ([skills/
 
 Repos live in `~/Documents/<name>` unless `$SHOPWARE_HOME_REPOS` says otherwise.
 Clone from `git@github.com:<remote>.git` if missing.
+Sessions start here, so a repo's own instructions do not load by themselves: before changing code in a repo, read its `AGENTS.md` (and the nested ones on the path you touch) and its `.claude/rules/*.md`.
 
 - Platform (`shopware/shopware`): `shopware`. Core, Administration, Storefront. Each full checkout is an **instance** → `shopware-local-dev`; feature work happens in worktrees → `shopware-worktree-dev`.
 - SwagCommercial (`shopware/SwagCommercial`): `SwagCommercial`. Downstream of platform; companion PRs → `shopware-commercial-companion`.

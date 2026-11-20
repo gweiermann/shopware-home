@@ -16,7 +16,7 @@ Worktrees: the `shopware-worktree-dev` skill.
    - Serve the worktree's PHP from inside the container:
      `PHP_CLI_SERVER_WORKERS=8 php -S 0.0.0.0:<port> -t public public/index.php`, with `DATABASE_URL`, `APP_URL=http://localhost:<port>` and `SHOPWARE_HTTP_CACHE_ENABLED=0` as env vars.
    - Start the worktree's admin dev server with the same `APP_URL`, so it proxies to that backend.
-3. **Take over** an instance other than the primary only when no session is using it.
+3. **Take over** an instance that is not protected (`shopware-local-dev`, "What agents may change") and that no session is using.
 
 Make the journey real: `plugin:refresh` and `plugin:install --activate` for extensions, `bin/console user:create` for users (`admin=0` for restricted ones), rows through the API or SQL on the PR database.
 A broken boot (failing `bundle:dump`, a plugin config the branch rejects) is yours to repair: `attach.sh --skip-plugin <name>`, clear `var/cache`.
