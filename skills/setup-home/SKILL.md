@@ -10,7 +10,7 @@ The goal is a machine where the home repo's skills, docs and tools run, adapted 
 Their current setup is the baseline: a migration that silently drops a behaviour is a regression.
 
 Look up every fact yourself (filesystem, `git`, `gh`, subagents for wide searches) and bring the person only decisions.
-Ask in rounds: number each question, give your recommendation, word it so "yes" accepts it.
+Ask in plain chat, in the `grilling` style, never through a question or form tool: rounds of numbered questions, each with your recommendation, worded so "yes" accepts it.
 Until they approve the plan, only read. Secrets stay unread.
 
 ## 1. Inventory
@@ -48,6 +48,9 @@ Done when the person approved the table.
 
 Back up before replacing: move every replaced skill and state file to `~/.agents/backup/<date>/`, never delete.
 Run `bin/install.sh`, write the preferences, add the pointer, update references to old names.
+
+Sessions that start in the home repo do not see a repo's own project skills (e.g. shopware/shopware's `.agents/skills`).
+The ones the person keeps get a symlink from `~/.agents/skills/<name>` (and `~/.claude/skills/<name>`) to the skill in that repo's main checkout, never a copy; the rest stay unlinked.
 A running long-lived session (a babysitting orchestrator) switches over in one step: migrate its state, then restart it on the new skill.
 
 ## 5. Verify

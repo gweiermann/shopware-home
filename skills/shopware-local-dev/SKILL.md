@@ -39,15 +39,17 @@ Every web container mounts the external `shopware-pkg-cache` volume as its compo
 
 ## What agents may change
 
-Whether an instance's data matters is the user's call, saved under "Instances" in `~/.agents/shopware-home/preferences.md`.
-No answer yet ⇒ ask once: are all instances disposable, or is one theirs to test in (and must keep its data)?
+How much each instance matters is the user's call, saved under "Instances" in `~/.agents/shopware-home/preferences.md`.
+No answer yet ⇒ ask once which level each instance has; disposable is a fine answer for all of them.
 
 **Disposable** (the default for instances agents set up and maintain themselves): migrate, reset, seed, clone or break the database to get the job done, without asking.
 Repair or reset what you broke when you are done.
 
-**Protected**: it keeps its data and stays usable; no reset, no test rows, no PR migrations.
+**Keep usable**: the user clicks around in it themselves. Anything goes as long as you leave it working: latest trunk's schema, demo data, the admin login.
+Broken ⇒ repair it before you are done, and tell the user.
+
+**Keep data**: as "keep usable", and its data stays: no reset, no test rows, no PR migrations.
 Reading it and dumping it as a seed for a copy are fine.
-Broken ⇒ repair it with steps 1–2 of the ladder below and tell the user.
 
 **Own database when you would get in others' way.** Other sessions share each instance.
 When your run leaves the database where another session would have to reset it (a PR's migrations, a version switch, bulk rows), or holds it busy for long, use a copy: create `shopware_<purpose>` (check the name is free first), load a dump of the instance database, and pass `-e DATABASE_URL=mysql://root:root@database/<copy>` on every `docker compose exec`; the container's `DATABASE_URL` env var beats `.env.local`.
@@ -80,7 +82,7 @@ Cheapest first, from the affected instance directory:
 1. `docker compose exec -T web bash -c 'rm -rf var/cache && bin/console cache:clear'`
 2. `docker compose exec -T web bin/console database:migrate --all`
 3. `shopware-instance update` (host): deps from the store + migrations.
-4. `shopware-instance reset` (host): reinstall + demo data. **Wipes the database**; never on a protected instance.
+4. `shopware-instance reset` (host): reinstall + demo data. **Wipes the database**; never on a "keep data" instance, and a "keep usable" one gets its demo data back.
 5. Demo data only: `docker compose exec -T web bash -c 'APP_ENV=prod bin/console framework:demodata'`. Check counts first; it duplicates.
 
 Never replace 3–4 with a bare `composer setup`: that installs everything from scratch, 5–12 minutes.
