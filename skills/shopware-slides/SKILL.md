@@ -15,7 +15,7 @@ Word the remaining text with the `humanizer` skill.
 
 ## What helped last time
 
-- `python-pptx` in a scratchpad venv does the job; the system Python lacks it.
+- `python-pptx` (and `pillow` for the contact sheet) in a scratchpad venv does the job; the system Python lacks both.
   [example-build.py](example-build.py) has the helpers (drop the template's example slides, text, cards, arrows) and a full deck to borrow layouts from.
 - The template has three masters: light (0), dark (1) and brand blue (2).
   The blue master's `Title Slide`, `Section Title 1` and `End` make good cover, section and closing slides; the light `Title Only` layout fits diagram slides.
