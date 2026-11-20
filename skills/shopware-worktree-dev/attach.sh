@@ -19,9 +19,9 @@
 #
 # The backend is always the worktree's own instance (the repo it was created
 # from). Choose the backend when you create the worktree:
-#   git -C ~/Documents/shopware-third worktree add .claude/worktrees/<name>
+#   git -C <home repo>/repositories/shopware/shopware-2 worktree add .claude/worktrees/<name>
 # A worktree under the instance root is inside the container's
-# '.:/var/www/html' mount already. One elsewhere (e.g. ~/.t3/worktrees/...) is
+# '.:/var/www/html' mount already. One elsewhere (e.g. a harness's own worktree folder) is
 # reached through mirror mounts at the identical host path; attach.sh prints the
 # one-time compose.override.yaml lines when the container lacks them.
 set -euo pipefail
@@ -66,7 +66,7 @@ while [ $# -gt 0 ]; do
         --skip-plugin) [ -n "${2:-}" ] || die "--skip-plugin needs a plugin directory name"; SKIP_ADD+=("$2"); shift 2 ;;
         --backend) die "the backend is fixed to $INSTANCE, the repo this worktree belongs to.
    To use another instance's stack, create the worktree under it:
-   git -C ~/Documents/shopware-<name> worktree add .claude/worktrees/$(basename "$WT")" ;;
+   git -C <home repo>/repositories/shopware/shopware-<n> worktree add .claude/worktrees/$(basename "$WT")" ;;
         *) die "unknown argument: $1" ;;
     esac
 done

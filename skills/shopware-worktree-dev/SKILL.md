@@ -37,7 +37,7 @@ instance's root, so no other stack can see this worktree. Pick the instance when
 you create the worktree, if its version matters:
 
 ```bash
-git -C ~/Documents/shopware-third worktree add .claude/worktrees/<name>
+git -C repositories/shopware/shopware-2 worktree add .claude/worktrees/<name>
 ```
 
 ## Dashboard
@@ -60,7 +60,7 @@ subject the same way, run from the instance directory.
 
 The container mounts the instance root as `/var/www/html`, so a worktree under
 `.claude/worktrees/` is already inside the container. A worktree elsewhere
-(`~/.t3/worktrees/shopware/...`) needs two mirror mounts on the `web` service,
+(a harness's own worktree folder) needs two mirror mounts on the `web` service,
 its parent directory and the instance root, each at its own host path;
 `attach.sh` prints the exact `compose.override.yaml` lines when they are missing.
 Adding them recreates the container, which stops every dev server running in it.
@@ -127,8 +127,8 @@ cause in one of the other two:
 
 | Checkout | Package | Owns |
 |---|---|---|
-| `~/Documents/meteor` | `@shopware-ag/meteor-component-library` | every `mt-*` component; pnpm workspace, code in `packages/component-library` |
-| `~/Documents/acceptance-test-suite` | `@shopware-ag/acceptance-test-suite` | the page objects, fixtures and helpers `tests/acceptance` imports |
+| `repositories/meteor` | `@shopware-ag/meteor-component-library` | every `mt-*` component; pnpm workspace, code in `packages/component-library` |
+| `repositories/acceptance-test-suite` | `@shopware-ag/acceptance-test-suite` | the page objects, fixtures and helpers `tests/acceptance` imports |
 
 Route the fix before writing it. When the wrong behaviour lives inside an `mt-*`
 component or an ATS helper, the change belongs in that repo — reaching for a
@@ -150,15 +150,15 @@ path, branch, and whether it is dirty. Copy-on-write, so the `~/.shopware-nm`
 store and every other worktree keep the published build. Nothing watches
 `dist/`: rebuild upstream and re-run it after every upstream edit.
 
-**Bare, it links the main checkout** — `~/Documents/meteor`,
-`~/Documents/acceptance-test-suite`. Work done on a branch in a worktree of
+**Bare, it links the main checkout** — `repositories/meteor`,
+`repositories/acceptance-test-suite`. Work done on a branch in a worktree of
 either needs `--from`, which takes a repo root, a package directory, or the
 name of a worktree under `<repo>/.claude/worktrees/`:
 
 ```bash
 link-local.sh meteor --list                      # every checkout, its version and build date
 link-local.sh meteor --from mt-select-flip-a1b2   # a worktree, by name
-link-local.sh meteor --from ~/Documents/meteor-pr1351
+link-local.sh meteor --from repositories/meteor/.claude/worktrees/pr1351
 ```
 
 Read the printed path before reading any result. A link from the wrong checkout

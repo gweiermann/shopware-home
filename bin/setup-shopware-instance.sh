@@ -22,16 +22,18 @@
 # that uses the shopware docker-dev compose stack (compose.yaml at its root).
 #
 # Usage:
-#   setup-shopware-instance.sh --name third --index 2 [options]
+#   setup-shopware-instance.sh --name shopware-3 --index 5 [options]
 #
 # Options:
 #   --name NAME       Instance name -> NAME.orb.local          (required)
 #   --index N         Port-offset index, N >= 1                      (required)
 #   --dir DIR         Target clone directory
-#                       (default: <parent-of-source>/shopware-NAME)
+#                       (default: $SHOPWARE_HOME_REPOS/shopware/NAME,
+#                        SHOPWARE_HOME_REPOS defaults to <home repo>/repositories)
 #   --source SRC      Local path or git URL to clone from
-#                       (default: $SHOPWARE_HOME_REPOS/shopware, ~/Documents/shopware)
+#                       (default: GitHub, reusing objects of a sibling instance)
 #   --branch BRANCH   Branch to check out            (default: trunk)
+#   --demodata        Install demo data too
 #   --no-install      Skip the install (just clone + config + up)
 #   --force           Continue even if computed host ports look occupied
 #   -h, --help        Show this help
@@ -42,7 +44,11 @@ set -euo pipefail
 NAME=""
 INDEX=""
 DIR=""
-SOURCE="${SHOPWARE_HOME_REPOS:-$HOME/Documents}/shopware"
+SCRIPT_DIR="$(cd -P "$(dirname "$0")" && pwd)"
+HOME_REPO="$(dirname "$SCRIPT_DIR")"
+REPOS="${SHOPWARE_HOME_REPOS:-$HOME_REPO/repositories}"
+SOURCE="git@github.com:shopware/shopware.git"
+DEMODATA="--no-demodata"
 BRANCH="trunk"
 DO_INSTALL=1
 FORCE=0
@@ -71,6 +77,7 @@ while [[ $# -gt 0 ]]; do
         --dir)       DIR="${2:-}"; shift 2 ;;
         --source)    SOURCE="${2:-}"; shift 2 ;;
         --branch)    BRANCH="${2:-}"; shift 2 ;;
+        --demodata)  DEMODATA=""; shift ;;
         --no-install) DO_INSTALL=0; shift ;;
         --force)     FORCE=1; shift ;;
         -h|--help)   sed -n '2,55p' "$0"; exit 0 ;;
@@ -89,7 +96,7 @@ command -v docker >/dev/null || die "docker not found"
 
 DOMAIN="${NAME}.orb.local"
 if [[ -z "$DIR" ]]; then
-    DIR="$(dirname "$SOURCE")/shopware-${NAME}"
+    DIR="$REPOS/shopware/${NAME}"
 fi
 
 # ---- port map --------------------------------------------------------------
@@ -128,7 +135,8 @@ if [[ -d "$DIR/.git" ]]; then
 else
     [[ -e "$DIR" ]] && die "${DIR} exists but is not a git repo"
     info "cloning ${SOURCE} -> ${DIR}"
-    git clone "$SOURCE" "$DIR"
+    REFERENCE="$(ls -d "$REPOS"/shopware/*/.git 2>/dev/null | head -1)"
+    git clone ${REFERENCE:+--reference-if-able "${REFERENCE%/.git}" --dissociate} "$SOURCE" "$DIR"
 fi
 info "checking out ${BRANCH}"
 git -C "$DIR" checkout "$BRANCH"
@@ -189,7 +197,7 @@ if [[ "$DO_INSTALL" -eq 1 ]]; then
         info "vendor/ already present — skipping install (delete it or use --no-install to control this)"
     else
         info "running shopware-instance reset: composer setup, with vendor/ and node_modules from ~/.shopware-nm"
-        "$(cd -P "$(dirname "$0")" && pwd)/shopware-instance" reset --no-demodata
+        "$SCRIPT_DIR/shopware-instance" reset $DEMODATA
     fi
 fi
 

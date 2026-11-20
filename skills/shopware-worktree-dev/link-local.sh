@@ -3,9 +3,9 @@
 # link-local.sh — serve a local upstream checkout to a Shopware worktree, so a
 # fix can be written and proven in the repository that owns the code.
 #
-#   meteor -> ~/Documents/meteor/packages/component-library
+#   meteor -> <home repo>/repositories/meteor/packages/component-library
 #             (@shopware-ag/meteor-component-library, used by the Administration)
-#   ats    -> ~/Documents/acceptance-test-suite
+#   ats    -> <home repo>/repositories/acceptance-test-suite
 #             (@shopware-ag/acceptance-test-suite, used by tests/acceptance)
 #
 # Those are only the defaults. The fix often sits on a branch in a worktree of
@@ -43,6 +43,7 @@ sys.exit(0 if libc.clonefile(sys.argv[1].encode(), sys.argv[2].encode(), 0) == 0
 pkg_field() { node -p "require('$1/package.json').$2" 2>/dev/null || true; }
 
 ADMIN_REL="src/Administration/Resources/app/administration"
+HOME_REPOS="$(cd -P "$(dirname "$0")/../.." && pwd)/repositories"
 
 TARGET=${1:-}
 [ $# -gt 0 ] && shift
@@ -64,14 +65,14 @@ done
 
 case "$TARGET" in
     meteor)
-        ROOT="${SHOPWARE_HOME_REPOS:-$HOME/Documents}/meteor"
+        ROOT="${SHOPWARE_HOME_REPOS:-$HOME_REPOS}/meteor"
         SRC_REL="packages/component-library"
         PKG="@shopware-ag/meteor-component-library"
         NM_REL="$ADMIN_REL"
         BUILD_HINT="pnpm build-only"
         ;;
     ats)
-        ROOT="${SHOPWARE_HOME_REPOS:-$HOME/Documents}/acceptance-test-suite"
+        ROOT="${SHOPWARE_HOME_REPOS:-$HOME_REPOS}/acceptance-test-suite"
         SRC_REL="."
         PKG="@shopware-ag/acceptance-test-suite"
         NM_REL="tests/acceptance"

@@ -12,7 +12,7 @@ The `setup-home` skill walks through it and adapts it; this is the reference.
 
 ## Repos and instances
 
-Clone what `AGENTS.md` lists into `~/Documents` (or set `SHOPWARE_HOME_REPOS`).
+Clone what `AGENTS.md` lists into `repositories/` ([the layout](../../repositories/README.md)), or point `SHOPWARE_HOME_REPOS` elsewhere.
 The first instance: `shopware-local-dev`, "Creating an instance".
 
 Two caches make instances and worktrees cheap; both fill themselves on first use:
@@ -39,13 +39,15 @@ npx skills add mattpocock/skills    # grilling, tdd, diagnosing-bugs, writing-fo
 ## Where sessions start
 
 Start sessions in this repo, in its main checkout; it needs no worktrees of its own.
-Code work happens in worktrees of the other repos, which the agent creates and attaches (`shopware-worktree-dev`).
+Code work happens in worktrees of the repos under `repositories/`, which the agent creates and attaches (`shopware-worktree-dev`).
 
-What that changes, because the harness loads configuration from the session's directory only:
+What that changes, because the harness loads configuration from the session's directory and, on demand, from folders below it:
 
 - **Memory** is keyed by git repository, so this repo starts with an empty one.
   Keep the memory you have: `"autoMemoryDirectory": "~/.claude/projects/<the old repo's slug>/memory"` in this repo's `.claude/settings.local.json` (gitignored, per machine).
-- **A repo's own instructions** (`AGENTS.md`, `.claude/rules/`, project settings and hooks) do not load from here; `AGENTS.md` tells the agent to read them before changing code.
+- **A repo's own instructions** (`CLAUDE.md`, nested `AGENTS.md`, `.claude/rules/`, `.claude/skills/`) load once the agent touches a file in that repo.
+- **A repo's own settings and hooks** do not load.
+  What must apply goes into this repo's `.claude/settings.local.json`: `skillOverrides` for repo skills to switch off, `claudeMdExcludes` (absolute globs such as `**/repositories/shopware/*/AGENTS.md`) for a repo file a personal copy replaces.
   A Claude Code session can also move into the worktree (`/cd`, or the `EnterWorktree` tool), which loads its configuration fully.
 - **User-level** instructions, rules (`~/.claude/rules/`), settings and hooks load everywhere, as before.
 

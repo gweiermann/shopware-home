@@ -17,7 +17,7 @@ Instances are playgrounds for agents; [what agents may change](#what-agents-may-
 ~/.claude/skills/shopware-worktree-dev/devboard.py list   # running instances, domains, attached dev servers
 ```
 
-The **primary** instance lives in `~/Documents/shopware` (or `$SHOPWARE_HOME_REPOS/shopware`); the others are clones next to it (`shopware-<name>`).
+Instances live in the home repo's `repositories/shopware/shopware-<n>`, at `http://shopware-<n>.orb.local`.
 Each one's `compose.override.yaml` holds its domain and host ports.
 
 OrbStack routes the domain straight to the container's port 8000: use it **without a port**.
@@ -29,9 +29,8 @@ A custom `.local` suffix that a network's DHCP also hands out as its search doma
 
 ## Creating an instance
 
-- **None yet:** clone `shopware/shopware` to `~/Documents/shopware`, add a `compose.override.yaml` with the `dev.orbstack.domains` label (copy the one `bin/setup-shopware-instance.sh` writes, index 0 keeps the default ports), `docker compose up -d`, then `bin/shopware-instance reset` from the home repo.
-- **All busy** (other sessions run version switches, migrations or long jobs on them) **and the machine has room** (Docker memory and disk; each stack needs a few GB of both): `bin/setup-shopware-instance.sh --name <name> --index <n>`.
-  It clones the primary, offsets the host ports by `index * 100`, ups the stack and installs.
+- **None yet, or all busy** (other sessions run version switches, migrations or long jobs on them) **and the machine has room** (Docker memory and disk; each stack needs a few GB of both): `bin/setup-shopware-instance.sh --name shopware-<n> --index <n + 2>` from the home repo.
+  It clones `trunk`, offsets the host ports by `index * 100`, ups the stack and installs; `--demodata` adds demo data.
 - **Cap: three instances.** Beyond that, share one: worktrees attach to busy instances fine, and a run that would disturb others gets its own database copy (below).
 
 Every web container mounts the external `shopware-pkg-cache` volume as its composer and npm download cache; a hand-written override needs the same lines the script writes.
@@ -62,7 +61,7 @@ Work in a worktree; leave `git checkout`, `switch` and `stash` in the instance c
 Commands run inside the container, from the instance directory, with `-T` for non-interactive use:
 
 ```bash
-cd ~/Documents/shopware && docker compose exec -T web <cmd>
+cd repositories/shopware/shopware-1 && docker compose exec -T web <cmd>
 ```
 
 `exec` fails ⇒ the stack is not up: `docker compose up -d web database` there first.

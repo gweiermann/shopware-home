@@ -37,7 +37,7 @@ Also check what the home repo assumes and this machine lacks (a primary instance
 Show one table: item → action (install, replace, keep theirs, leave out) → what changes for them.
 Then ask for the answers the skills need, and whether to keep each for good or for this session only:
 
-- which repos and how many instances (at most three), and whether any instance is theirs to test in and must keep its data (all disposable is a fine answer);
+- which repos to clone into `repositories/`, how many instances (at most three), whether existing checkouts elsewhere move there or stay, and whether any instance is theirs to test in and must keep its data (all disposable is a fine answer);
 - PR defaults for `pr-create` (labels, assignee) and babysitting (`babysit-pr` and `babysit-all-prs` ask their own questions; seed their answers from the old setup's rules);
 - where sessions start (here, or still inside the repos) and what that costs them: [docs/setup/machine.md](../../docs/setup/machine.md), "Where sessions start";
 - the line pointing global instructions at the home repo.
@@ -49,8 +49,9 @@ Done when the person approved the table.
 Back up before replacing: move every replaced skill and state file to `~/.agents/backup/<date>/`, never delete.
 Run `bin/install.sh`, write the preferences, add the pointer, update references to old names.
 
-Sessions that start in the home repo do not see a repo's own project skills (e.g. shopware/shopware's `.agents/skills`).
-The ones the person keeps get a symlink from `~/.agents/skills/<name>` (and `~/.claude/skills/<name>`) to the skill in that repo's main checkout, never a copy; the rest stay unlinked.
+Sessions that start in the home repo see a repo's own project skills (e.g. shopware/shopware's `.claude/skills`) only once they touch that repo, and never its settings.
+A repo's skills load on demand from `repositories/`; the ones the person switches off go into `skillOverrides` in the home repo's `.claude/settings.local.json`.
+The ones the person wants available before touching the repo get a symlink from `~/.agents/skills/<name>` (and `~/.claude/skills/<name>`) to the skill in that repo's checkout, never a copy.
 A running long-lived session (a babysitting orchestrator) switches over in one step: migrate its state, then restart it on the new skill.
 
 ## 5. Verify

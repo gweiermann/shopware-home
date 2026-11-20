@@ -7,11 +7,12 @@ New here, or something below is missing on this machine: `/setup-home` ([skills/
 
 ## Repos
 
-Repos live in `~/Documents/<name>` unless `$SHOPWARE_HOME_REPOS` says otherwise.
+Repos live in `repositories/<name>` (or `$SHOPWARE_HOME_REPOS/<name>`); [repositories/README.md](repositories/README.md) explains the layout.
 Clone from `git@github.com:<remote>.git` if missing.
-Sessions start here, so a repo's own instructions do not load by themselves: before changing code in a repo, read its `AGENTS.md` (and the nested ones on the path you touch) and its `.claude/rules/*.md`.
+They are gitignored here, so search inside one: `rg <pattern> repositories/<name>`.
+A repo's own `CLAUDE.md`, rules and skills load once you touch a file in it; its settings do not, the home repo's apply.
 
-- Platform (`shopware/shopware`): `shopware`. Core, Administration, Storefront. Each full checkout is an **instance** → `shopware-local-dev`; feature work happens in worktrees → `shopware-worktree-dev`.
+- Platform (`shopware/shopware`): `shopware/shopware-<n>`, one checkout per **instance** → `shopware-local-dev`, [repositories/shopware/README.md](repositories/shopware/README.md). Core, Administration, Storefront. Feature work happens in worktrees inside an instance → `shopware-worktree-dev`.
 - SwagCommercial (`shopware/SwagCommercial`): `SwagCommercial`. Downstream of platform; companion PRs → `shopware-commercial-companion`.
 - Rufus (`shopware/rufus`): `rufus`. Downstream like SwagCommercial.
 - Meteor (`shopware/meteor`): `meteor`. The `mt-*` components; fix their bugs here → `shopware-worktree-dev`, "Fix it upstream".

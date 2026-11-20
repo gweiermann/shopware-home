@@ -1,1 +1,8 @@
 .claude/settings.local.json
+
+# Clones live here; only the READMEs that explain the layout are tracked.
+/repositories/*
+!/repositories/README.md
+!/repositories/shopware/
+/repositories/shopware/*
+!/repositories/shopware/README.md
