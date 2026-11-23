@@ -31,19 +31,21 @@ When you are asked to create a pr:
 5. Review the diff against the base (`git diff --stat origin/<base>...HEAD`,
    then the diff itself). It must contain only this change. Stray files or
    commits from another branch in the stack ⇒ stop and report them.
-6. Write the body to a file in the scratchpad, never inline in the shell:
+6. Fill the **Impact** sub-section of section 2 from the `pr-review` skill's
+   "Impact and blast radius" report, see Impact below.
+7. Write the body to a file in the scratchpad, never inline in the shell:
    `gh pr create --body-file <path>`. Heredocs mangle the nested fenced code
    blocks the examples rely on.
-7. Before creating: reread the draft against **every** check under Description
+8. Before creating: reread the draft against **every** check under Description
    style below. Altitude checks first (a draft can pass the length budget and
    still be unreadable.) Then check the title, the body and every quoted log or
    screenshot for secrets and private details (tokens, internal URLs, customer
    data).
-8. Create it: no confirmation step, no preview-and-wait. It is a draft and
+9. Create it: no confirmation step, no preview-and-wait. It is a draft and
    cheap to redo; the user reviews it on GitHub, not in the terminal.
-9. Report back with the PR URL, the base you chose, and anything you had to
-   assume. Do not paste the body back into the chat.
-10. Hand the PR to babysitting: the `babysit-pr` skill's "Orchestrator" section
+10. Report back with the PR URL, the base you chose, and anything you had to
+    assume. Do not paste the body back into the chat.
+11. Hand the PR to babysitting: the `babysit-pr` skill's "Orchestrator" section
     says whether a `babysit-all-prs` session takes it over.
 
 ```bash
@@ -146,6 +148,30 @@ sentences of description.
 - prose retellings of the new test; a reviewer reads the spec
 - the path that already worked correctly
 - "as discussed", rejected alternatives, how the bug was found
+
+## Impact — taken from pr-review
+
+Section 2 always gets a `#### Impact` sub-section, written from the `pr-review`
+skill's "Impact and blast radius" report:
+
+- A `pr-review` report on this branch exists in the session ⇒ take its impact
+  section.
+- None exists ⇒ run only step 6 ("Assess impact") of `pr-review` against the
+  diff. The full review with its environment and reproductions is not part of
+  filing a PR.
+
+Keep the report's bullets and order, and drop every bullet whose value is
+"none": the template forbids stating what did not change.
+
+```markdown
+#### Impact
+
+- Public API: new `sw-product-filter` prop `persistInRoute`
+- Affected: product listing in the Administration, extensions overriding its filter block
+- Risk: low. The filter falls back to the old behaviour when the route has no query.
+```
+
+A breaking change also names what extension developers have to do.
 
 ## The remaining sections
 
