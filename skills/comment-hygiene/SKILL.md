@@ -1,6 +1,6 @@
 ---
 name: comment-hygiene
-description: Verify that code comments earn their place in the codebase. Use as a verification pass after every code change and during any code review — scan the comments you or someone else added and remove AI slop (comments that answer a chat message, narrate the diff, restate scope decisions, or wall-of-text). A comment must make sense to a future reader who never saw this chat, this PR, or this diff.
+description: Verify that code comments earn their place in the codebase. Use after adding or changing code comments, and during code review — scan the comments you or someone else added and remove AI slop (comments that answer a chat message, narrate the diff, restate scope decisions, or wall-of-text). A comment must make sense to a future reader who never saw this chat, this PR, or this diff.
 license: MIT
 ---
 
