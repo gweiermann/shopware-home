@@ -1,5 +1,6 @@
 """Build the Tech Weekly deck on top of master-2026.pptx (its masters, layouts and theme)."""
 import copy
+import os
 import sys
 
 from lxml import etree
@@ -10,7 +11,7 @@ from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.oxml.ns import qn
 from pptx.util import Emu, Inches, Pt
 
-SRC = "/Users/g.weiermann/Documents/Presentations/master-2026.pptx"
+SRC = os.path.expanduser("~/Documents/Presentations/master-2026.pptx")
 OUT = sys.argv[1]  # example deck: Tech Weekly 2026-11; copy the helpers, replace the slides
 
 INK = RGBColor(0x11, 0x15, 0x1E)
