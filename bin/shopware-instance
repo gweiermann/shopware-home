@@ -31,6 +31,7 @@ set -euo pipefail
 exec </dev/null
 
 ADMIN=src/Administration/Resources/app/administration
+ADMIN_VITE_8=$ADMIN/build/vite-8    # the toolchain FEATURE_ALL=major (ADMIN_VITE_8) builds with
 STOREFRONT=src/Storefront/Resources/app/storefront
 ACCEPTANCE=tests/acceptance
 STORE=${SHOPWARE_NM_STORE:-$HOME/.shopware-nm}
@@ -90,10 +91,11 @@ park() {
     rm -rf "$tmp"
 }
 
-# npm_tree <package dir> <composer npm script> <ci|install>
+# npm_tree <package dir> <npm runner> <ci|install>
+# The runner is the npm command for that dir, e.g. `composer npm:admin`.
 # On a miss, `ci` installs from scratch and `install` updates the existing tree in place.
 npm_tree() {
-    local dir=$1 script=$2 miss=$3
+    local dir=$1 npm=$2 miss=$3
     local tree="$dir/node_modules" lock="$dir/package-lock.json" entry
     entry=$(store_entry "$lock" node_modules)
 
@@ -114,11 +116,11 @@ npm_tree() {
     fi
 
     if [ "$miss" = install ] && [ -d "$tree" ]; then
-        in_web "composer $script install --no-audit --prefer-offline"
+        in_web "$npm install --no-audit --prefer-offline"
         STEP_NOTE+="npm install"
     else
         drop_tree "$tree"
-        in_web "composer $script clean-install --no-audit --prefer-offline"
+        in_web "$npm clean-install --no-audit --prefer-offline"
         STEP_NOTE+="npm ci"
     fi
     # npm install may rewrite the lockfile, so key on the one it left behind.
@@ -156,10 +158,13 @@ storefront_link() { in_web "cd $STOREFRONT && node build/link-component-node-mod
 deps() {
     local miss=$1
     timed "composer"           composer_vendor
-    timed "npm admin"          npm_tree "$ADMIN" npm:admin "$miss"
-    timed "npm storefront"     npm_tree "$STOREFRONT" npm:storefront "$miss"
+    timed "npm admin"          npm_tree "$ADMIN" "composer npm:admin" "$miss"
+    # The admin's postinstall installs it, but a tree restored from the store skips that.
+    [ ! -f "$ADMIN_VITE_8/package-lock.json" ] \
+        || timed "npm admin vite-8" npm_tree "$ADMIN_VITE_8" "npm --prefix $ADMIN_VITE_8" "$miss"
+    timed "npm storefront"     npm_tree "$STOREFRONT" "composer npm:storefront" "$miss"
     timed "storefront link"    storefront_link
-    timed "npm acceptance"     npm_tree "$ACCEPTANCE" npm:acceptance "$miss"
+    timed "npm acceptance"     npm_tree "$ACCEPTANCE" "composer npm:acceptance" "$miss"
 }
 
 clear_cache() { in_web 'rm -rf var/cache'; }

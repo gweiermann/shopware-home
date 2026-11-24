@@ -34,6 +34,7 @@
 #                       (default: GitHub, reusing objects of a sibling instance)
 #   --branch BRANCH   Branch to check out            (default: trunk)
 #   --demodata        Install demo data too
+#   --major           6.8 instance: FEATURE_ALL=major for the whole stack
 #   --no-install      Skip the install (just clone + config + up)
 #   --force           Continue even if computed host ports look occupied
 #   -h, --help        Show this help
@@ -49,6 +50,7 @@ HOME_REPO="$(dirname "$SCRIPT_DIR")"
 REPOS="${SHOPWARE_HOME_REPOS:-$HOME_REPO/repositories}"
 SOURCE="git@github.com:shopware/shopware.git"
 DEMODATA="--no-demodata"
+MAJOR=0
 BRANCH="trunk"
 DO_INSTALL=1
 FORCE=0
@@ -78,9 +80,10 @@ while [[ $# -gt 0 ]]; do
         --source)    SOURCE="${2:-}"; shift 2 ;;
         --branch)    BRANCH="${2:-}"; shift 2 ;;
         --demodata)  DEMODATA=""; shift ;;
+        --major)     MAJOR=1; shift ;;
         --no-install) DO_INSTALL=0; shift ;;
         --force)     FORCE=1; shift ;;
-        -h|--help)   sed -n '2,55p' "$0"; exit 0 ;;
+        -h|--help)   sed -n '2,/^set -euo/p' "$0" | sed '$d'; exit 0 ;;
         *)           die "unknown argument: $1 (use --help)" ;;
     esac
 done
@@ -148,6 +151,7 @@ services:
     web:
         environment:
             APP_URL: http://${DOMAIN}
+$( [[ "$MAJOR" -eq 1 ]] && printf '            # 6.8 instance: the major flag is on for the whole stack.\n            FEATURE_ALL: major\n' )
             # 5175 (storefront vite) is published on the host as ${VITE_SF}.
             STOREFRONT_VITE_ORIGIN: http://localhost:${VITE_SF}
             COMPOSER_CACHE_DIR: ${PKG_CACHE_MOUNT}/composer

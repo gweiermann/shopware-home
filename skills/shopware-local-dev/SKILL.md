@@ -27,10 +27,24 @@ Login: `admin` / `shopware`.
 Domains stay under `.orb.local`.
 A custom `.local` suffix that a network's DHCP also hands out as its search domain (the Shopware office hands out `shopware.local`) makes macOS race unicast DNS against mDNS, and the name resolves only until the next cache flush.
 
+### 6.7 and 6.8 instances
+
+There is always at least one instance per mode; the preferences file names which.
+Check 6.7 behaviour on the 6.7 instance and 6.8 behaviour on the 6.8 one.
+Never fake the mode by rewriting the feature flags in the browser: the admin then runs one mode against a backend in the other, and unrelated pages break.
+
+```bash
+docker compose exec -T web bin/console feature:list | grep V6_8_0_0   # Enabled = 6.8, Disabled = 6.7
+```
+
+The mode comes from `FEATURE_ALL: major` in the web service's `environment` in `compose.override.yaml`.
+A `.env.local` without a `.env` is not read.
+A database that already ran in 6.8 mode cannot go back to 6.7, because migrations only run forward: a 6.7 instance needs a fresh install (`shopware-instance reset`).
+
 ## Creating an instance
 
 - **None yet, or all busy** (other sessions run version switches, migrations or long jobs on them) **and the machine has room** (Docker memory and disk; each stack needs a few GB of both): `bin/setup-shopware-instance.sh --name shopware-<n> --index <n + 2>` from the home repo.
-  It clones `trunk`, offsets the host ports by `index * 100`, ups the stack and installs; `--demodata` adds demo data.
+  It clones `trunk`, offsets the host ports by `index * 100`, ups the stack and installs; `--demodata` adds demo data, `--major` makes it a 6.8 instance.
 - **Cap: three instances.** Beyond that, share one: worktrees attach to busy instances fine, and a run that would disturb others gets its own database copy (below).
 
 Every web container mounts the external `shopware-pkg-cache` volume as its composer and npm download cache; a hand-written override needs the same lines the script writes.

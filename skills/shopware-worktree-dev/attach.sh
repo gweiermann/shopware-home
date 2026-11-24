@@ -153,43 +153,51 @@ report_todos() {
 # /@fs/<realpath outside the worktree> and its own fs.allow rejects them with a
 # 403 (fonts, svgs). A cloned real directory sidesteps that for free.
 
-lock_hash() { shasum -a 256 "$1/$ADMIN_REL/package-lock.json" | cut -c1-12; }
-
 # npm records what it actually installed in node_modules/.package-lock.json. A
 # matching lockfile hash alone also accepts a tree installed from an older lock,
 # which then poisons the store for every worktree cloned from it.
-matches_lock() { "$GENERIC/npm-tree-matches-lock" "$1" "$WT/$ADMIN_REL/package-lock.json" 2>/dev/null; }
+matches_lock() { "$GENERIC/npm-tree-matches-lock" "$1" "$2" 2>/dev/null; }
 
-WT_LOCK=$(lock_hash "$WT")
-INSTANCE_LOCK=$(lock_hash "$INSTANCE")
-NM="$WT/$ADMIN_REL/node_modules"
-STORE="$HOME/.shopware-nm/$WT_LOCK/node_modules"
+# provide_node_modules <package dir relative to the checkout> <label>
+provide_node_modules() {
+    local rel=$1 label=$2
+    local lock="$WT/$rel/package-lock.json" nm="$WT/$rel/node_modules" seed="$INSTANCE/$rel/node_modules"
+    local hash store
+    hash=$(shasum -a 256 "$lock" | cut -c1-12)
+    store="$HOME/.shopware-nm/$hash/node_modules"
 
-if [ -d "$NM/.bin" ] && [ ! -L "$NM" ] && matches_lock "$NM"; then
-    say "node_modules  present, matches lockfile $WT_LOCK"
-else
-    [ -e "$NM" ] && say "node_modules  present but does not match lockfile $WT_LOCK, replacing it"
-    rm -rf "$NM"
-    if [ -d "$STORE" ] && ! matches_lock "$STORE"; then
-        rm -rf "$STORE"
-        say "node_modules  stale store entry $WT_LOCK discarded"
+    if [ -d "$nm/.bin" ] && [ ! -L "$nm" ] && matches_lock "$nm" "$lock"; then
+        say "$label  present, matches lockfile $hash"
+        return
     fi
-    if [ ! -d "$STORE" ] && matches_lock "$INSTANCE/$ADMIN_REL/node_modules"; then
-        mkdir -p "$(dirname "$STORE")"
-        clone_tree "$INSTANCE/$ADMIN_REL/node_modules" "$STORE"
-        say "node_modules  store seeded from the instance ($WT_LOCK)"
+    [ -e "$nm" ] && say "$label  present but does not match lockfile $hash, replacing it"
+    rm -rf "$nm"
+    if [ -d "$store" ] && ! matches_lock "$store" "$lock"; then
+        rm -rf "$store"
+        say "$label  stale store entry $hash discarded"
     fi
-    if [ -d "$STORE" ]; then
-        clone_tree "$STORE" "$NM"
-        say "node_modules  cloned from store $WT_LOCK"
+    if [ ! -d "$store" ] && matches_lock "$seed" "$lock"; then
+        mkdir -p "$(dirname "$store")"
+        clone_tree "$seed" "$store"
+        say "$label  store seeded from the instance ($hash)"
+    fi
+    if [ -d "$store" ]; then
+        clone_tree "$store" "$nm"
+        say "$label  cloned from store $hash"
     else
-        mkdir -p "$(dirname "$STORE")"
-        todo "No node_modules matching lockfile $WT_LOCK, neither in the store nor in the instance (lockfile $INSTANCE_LOCK). Install once, then park it in the store:
-     cd $BACKEND_DIR && docker compose exec -T web bash -c 'cd $WT_CTR/$ADMIN_REL && npm ci'
-     mv $NM $STORE
+        mkdir -p "$(dirname "$store")"
+        todo "No $label matching lockfile $hash, neither in the store nor in the instance. Install once, then park it in the store:
+     cd $BACKEND_DIR && docker compose exec -T web bash -c 'cd $WT_CTR/$rel && npm ci'
+     mv $nm $store
    Then re-run attach.sh. Every worktree on this lockfile clones from it in seconds."
     fi
-fi
+}
+
+provide_node_modules "$ADMIN_REL" node_modules
+# The Vite 8 toolchain that FEATURE_ALL=major builds with. The admin's postinstall
+# installs it, but a tree cloned from the store skips that.
+[ ! -f "$WT/$ADMIN_REL/build/vite-8/package-lock.json" ] \
+    || provide_node_modules "$ADMIN_REL/build/vite-8" "vite-8 node_modules"
 
 # --- vendor: cheap APFS clone, then re-dumped so the autoloader points at THIS checkout
 
