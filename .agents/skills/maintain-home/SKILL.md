@@ -38,6 +38,6 @@ Every change keeps it that way. Read the decisions below, then make the change s
 
 ## Before you finish
 
-- `git grep -n -i -E '/Users/|gerrit|g\.weiermann'` finds nothing outside author lines, and the change passes decision 10.
+- The diff passes decision 10: `git diff` names no person (your own name, handle and home directory included) and no absolute home path, and every value that is one person's choice reads from a preferences file.
 - `bin/install.sh --dry-run` still runs without new conflicts when you added, renamed or removed a skill.
 - A changed script runs once for real (`bash -n` is not enough).
