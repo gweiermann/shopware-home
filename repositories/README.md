@@ -3,6 +3,8 @@
 Every repo `AGENTS.md` lists is cloned here, one folder per repo, named as `AGENTS.md` names it.
 A missing one gets cloned when an agent first needs it: `git clone git@github.com:<remote>.git repositories/<name>`.
 
+Worktrees live inside their repo, in `<name>/.claude/worktrees/<worktree>`, never as a sibling folder here.
+
 The clones are gitignored, so a search from the home repo's root skips them.
 Search inside the repo: `rg <pattern> repositories/<name>`.
 

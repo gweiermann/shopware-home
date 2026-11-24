@@ -10,6 +10,7 @@ New here, or something below is missing on this machine: `/setup-home` ([skills/
 Repos live in `repositories/<name>` (or `$SHOPWARE_HOME_REPOS/<name>`); [repositories/README.md](repositories/README.md) explains the layout.
 Clone from `git@github.com:<remote>.git` if missing.
 They are gitignored here, so search inside one: `rg <pattern> repositories/<name>`.
+Worktrees of any repo go in `repositories/<name>/.claude/worktrees/<worktree>`, never next to the repo; a hook in `.claude/settings.json` enforces it.
 A repo's own `CLAUDE.md`, rules and skills load once you touch a file in it; its settings do not, the home repo's apply.
 
 - Platform (`shopware/shopware`): `shopware/shopware-<n>`, one checkout per **instance** → `shopware-local-dev`, [repositories/shopware/README.md](repositories/shopware/README.md). Core, Administration, Storefront. Feature work happens in worktrees inside an instance → `shopware-worktree-dev`.
