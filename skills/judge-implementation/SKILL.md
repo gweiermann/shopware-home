@@ -101,7 +101,7 @@ One line each, quoted and linked.
 
 Impact, quick-fix scale, and verdict always appear; every other section only with a finding.
 Quote and link every claim.
-Run it through the `humanizer` skill before handing it over.
+Run it through the `humanizer` skill, when installed, before handing it over.
 
 ````markdown
 ## Impact and blast radius

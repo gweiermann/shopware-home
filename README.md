@@ -6,8 +6,8 @@ Start with [AGENTS.md](AGENTS.md).
 Setting up a machine: run `/setup-home` in an agent session here, or read [docs/setup/machine.md](docs/setup/machine.md).
 
 ```bash
-git clone --recurse-submodules git@github.com:gweiermann/shopware-home.git ~/Documents/shopware-home
-~/Documents/shopware-home/bin/install.sh --dry-run
+git clone --recurse-submodules https://github.com/gweiermann/shopware-home.git
+shopware-home/bin/install.sh --dry-run
 ```
 
 Generic skills come from [gweiermann/skills](https://github.com/gweiermann/skills) as the `general/` submodule.

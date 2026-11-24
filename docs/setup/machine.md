@@ -23,8 +23,8 @@ Two caches make instances and worktrees cheap; both fill themselves on first use
 ## Skills
 
 ```bash
-git -C ~/Documents/shopware-home submodule update --init
-~/Documents/shopware-home/bin/install.sh --dry-run
+git -C <home repo> submodule update --init
+<home repo>/bin/install.sh --dry-run
 ```
 
 It links every skill into `~/.agents/skills` (Codex reads it) and from there into `~/.claude/skills`, and the instance tools into `~/bin`.
@@ -54,7 +54,7 @@ What that changes, because the harness loads configuration from the session's di
 Sessions that still start inside a repo reach this one through a line in the global instructions (`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`):
 
 ```md
-Shopware home (repos, setup, Shopware specifics for running, reviewing and babysitting PRs): ~/Documents/shopware-home/AGENTS.md
+Shopware home (repos, setup, Shopware specifics for running, reviewing and babysitting PRs): <home repo>/AGENTS.md
 ```
 
 ## Personal context

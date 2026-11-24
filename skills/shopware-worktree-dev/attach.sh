@@ -19,7 +19,7 @@
 #
 # The backend is always the worktree's own instance (the repo it was created
 # from). Choose the backend when you create the worktree:
-#   git -C <home repo>/repositories/shopware/shopware-2 worktree add .claude/worktrees/<name>
+#   git -C <home repo>/repositories/shopware/shopware-<n> worktree add .claude/worktrees/<name>
 # A worktree under the instance root is inside the container's
 # '.:/var/www/html' mount already. One elsewhere (e.g. a harness's own worktree folder) is
 # reached through mirror mounts at the identical host path; attach.sh prints the

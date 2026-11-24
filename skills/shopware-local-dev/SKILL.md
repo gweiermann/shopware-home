@@ -25,12 +25,11 @@ A browser that has to log in (any browser agent) uses `http://localhost:<host po
 Login: `admin` / `shopware`.
 
 Domains stay under `.orb.local`.
-A custom `.local` suffix that a network's DHCP also hands out as its search domain (the Shopware office hands out `shopware.local`) makes macOS race unicast DNS against mDNS, and the name resolves only until the next cache flush.
+A custom `.local` suffix that a network's DHCP also hands out as its search domain (a corporate network often does) makes macOS race unicast DNS against mDNS, and the name resolves only until the next cache flush.
 
 ### 6.7 and 6.8 instances
 
-There is always at least one instance per mode; the preferences file names which.
-Check 6.7 behaviour on the 6.7 instance and 6.8 behaviour on the 6.8 one.
+Check 6.7 behaviour on a 6.7 instance and 6.8 behaviour on a 6.8 one; "Instances" in the preferences file may name which, and whether one of each must always be up.
 Never fake the mode by rewriting the feature flags in the browser: the admin then runs one mode against a backend in the other, and unrelated pages break.
 
 ```bash
@@ -45,7 +44,7 @@ A database that already ran in 6.8 mode cannot go back to 6.7, because migration
 
 - **None yet, or all busy** (other sessions run version switches, migrations or long jobs on them) **and the machine has room** (Docker memory and disk; each stack needs a few GB of both): `bin/setup-shopware-instance.sh --name shopware-<n> --index <n + 2>` from the home repo.
   It clones `trunk`, offsets the host ports by `index * 100`, ups the stack and installs; `--demodata` adds demo data, `--major` makes it a 6.8 instance.
-- **Cap: three instances.** Beyond that, share one: worktrees attach to busy instances fine, and a run that would disturb others gets its own database copy (below).
+- **Cap: the user's maximum** ("Instances" in the preferences; three when unset). Beyond that, share one: worktrees attach to busy instances fine, and a run that would disturb others gets its own database copy (below).
 
 Every web container mounts the external `shopware-pkg-cache` volume as its composer and npm download cache; a hand-written override needs the same lines the script writes.
 `vendor/` and every `node_modules` come from `~/.shopware-nm/<lockfile hash>/` as copy-on-write clones; `shopware-instance` fills and reads it.
@@ -67,15 +66,14 @@ Reading it and dumping it as a seed for a copy are fine.
 **Own database when you would get in others' way.** Other sessions share each instance.
 When your run leaves the database where another session would have to reset it (a PR's migrations, a version switch, bulk rows), or holds it busy for long, use a copy: create `shopware_<purpose>` (check the name is free first), load a dump of the instance database, and pass `-e DATABASE_URL=mysql://root:root@database/<copy>` on every `docker compose exec`; the container's `DATABASE_URL` env var beats `.env.local`.
 
-**Checkouts stay the user's.** Each instance checkout holds the user's own branch and uncommitted work.
-Work in a worktree; leave `git checkout`, `switch` and `stash` in the instance checkout to them.
+**Checkouts stay on `trunk`.** Work in a worktree; leave `git checkout`, `switch` and `stash` in the instance checkout alone, since the user or another session may have work there (`git status` first).
 
 ## Running commands
 
 Commands run inside the container, from the instance directory, with `-T` for non-interactive use:
 
 ```bash
-cd repositories/shopware/shopware-1 && docker compose exec -T web <cmd>
+cd repositories/shopware/shopware-<n> && docker compose exec -T web <cmd>
 ```
 
 `exec` fails ⇒ the stack is not up: `docker compose up -d web database` there first.

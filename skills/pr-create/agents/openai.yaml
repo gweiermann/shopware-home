@@ -1,3 +1,3 @@
 display_name: Create PR
-short_description: Opens a draft Shopware PR — self-assigned, framework/administration labels, tight, template-conform description.
+short_description: Opens a Shopware PR with your saved defaults and a tight, template-conform description.
 default_prompt: Create the pull request for this branch using my defaults and hand me the URL.

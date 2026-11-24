@@ -42,7 +42,6 @@ git -C $I worktree add --detach .claude/worktrees/user-review-<n>-before "$(git 
 ### Screens (Administration, Storefront)
 
 Drive them with the Playwright browser tools on the `localhost` URLs `attach.sh` prints; browser agents may only type the test login on `localhost`.
-For feature flags, ACL forcing, demo data, and screenshot tricks, see the `pr-review-report` skill's `references/live-verification.md` where installed.
 
 ### Admin API and Store API
 

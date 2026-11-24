@@ -1,16 +1,19 @@
 ---
 name: pr-create
-description: Create a GitHub pull request in a Shopware repo with the user's defaults (draft, self-assigned, their team's labels) and a tight, template-conform description. Use whenever the user asks to create/open/raise a PR, "put this up as a PR", "make a PR for this branch", or to fill in a PR description before opening it.
+description: Create a GitHub pull request in a Shopware repo with the user's saved PR defaults (draft or ready, assignee, labels) and a tight, template-conform description. Use whenever the user asks to create/open/raise a PR, "put this up as a PR", "make a PR for this branch", or to fill in a PR description before opening it.
 license: MIT
 ---
 
 # Create a PR
 
-When you are asked to create a pr:
-- make it a draft
-- Assignee: @me
-- Labels: the user's team labels from `~/.agents/shopware-home/preferences.md` (e.g. `domain/framework` + `component/administration`), when they exist in the repository.
-  No saved labels ⇒ ask once and offer to save them.
+The user's PR defaults live under "PRs" in `~/.agents/shopware-home/preferences.md`:
+
+- draft or ready for review;
+- assignee (e.g. `@me`, or none);
+- labels (e.g. `domain/<team>` + `component/<area>`), applied when they exist in the repository;
+- description style rules on top of the ones below.
+
+A missing default ⇒ ask once and offer to save it.
 
 ## Procedure
 
@@ -41,15 +44,15 @@ When you are asked to create a pr:
    still be unreadable.) Then check the title, the body and every quoted log or
    screenshot for secrets and private details (tokens, internal URLs, customer
    data).
-9. Create it: no confirmation step, no preview-and-wait. It is a draft and
-   cheap to redo; the user reviews it on GitHub, not in the terminal.
+9. Create it: no confirmation step, no preview-and-wait. A PR is cheap to
+   edit; the user reviews it on GitHub, not in the terminal.
 10. Report back with the PR URL, the base you chose, and anything you had to
     assume. Do not paste the body back into the chat.
 11. Hand the PR to babysitting: the `babysit-pr` skill's "Orchestrator" section
     says whether a `babysit-all-prs` session takes it over.
 
 ```bash
-gh pr create --draft --assignee @me --label <team label>... --base <base> --title "<type>(<scope>): <subject>" --body-file <scratchpad>/pr-body.md
+gh pr create [--draft] [--assignee <assignee>] [--label <label>...] --base <base> --title "<type>(<scope>): <subject>" --body-file <scratchpad>/pr-body.md
 ```
 
 If a label or assignee is rejected (missing label, no write access), create the
@@ -69,11 +72,7 @@ Fix them in that order. Altitude and detail are what a length cut alone never
 finds: a draft can sit inside the budget and still be opaque, or still be doing
 the reviewer's reading for them.
 
-Sacrifice grammar for consiceness and readability. Make use of new lines to visually separate information.
-Too much `inline code` markup creates noise, keep that in mind.
-
-Never use em dashes. Don't use double negative sentences. Usually you should state what is and not what isn't.
-Don't add explainers in `..., so ...`. If you want to explain something take up more space (but use sparingly).
+Use new lines to separate information visually. State what is, not what isn't.
 
 ## Altitude: write for a cold reader
 
@@ -187,7 +186,7 @@ one visible line saying why; a reviewer will ask otherwise.
 ## Known defects and deferred scope — the exception
 
 **Most PRs have none. Do not go looking for one to fill a slot.** `nit:` is not
-part of the default shape; it has appeared in exactly one of the user's PRs.
+part of the default shape; it is rare.
 
 Add a note only when you knowingly ship something the reviewer would otherwise
 have to discover in review:
@@ -203,7 +202,7 @@ the diff already makes plain, and it stops meaning anything.
 
 # Growing the example set
 
-The user will add more examples over time. When they say "this is a good PR
+When the user says "this is a good PR
 description" / "add this as an example":
 
 - Append a new `## Example N — <short slug>` section to

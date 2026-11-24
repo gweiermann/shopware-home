@@ -37,7 +37,7 @@ instance's root, so no other stack can see this worktree. Pick the instance when
 you create the worktree, if its version matters:
 
 ```bash
-git -C repositories/shopware/shopware-2 worktree add .claude/worktrees/<name>
+git -C repositories/shopware/shopware-<n> worktree add .claude/worktrees/<name>
 ```
 
 ## Dashboard
@@ -92,7 +92,7 @@ config's own reporters. Leave it off.
 
 **`imported but could not be resolved` (vite).** The worktree's `node_modules`
 does not match its lockfile. `attach.sh` checks every tree with
-`~/bin/npm-tree-matches-lock`, so re-running it replaces a stale one. Compare
+`general/skills/worktree-attach/scripts/npm-tree-matches-lock`, so re-running it replaces a stale one. Compare
 the branch's pin with the installed version:
 
 ```
@@ -174,10 +174,10 @@ pin, because linking across that gap means the result you read is not the
 result the pinned version gives. Either check out the matching tag upstream,
 or bump the pin and treat the bump as part of the change.
 
-### Both checkouts are the user's own working copies
+### Both checkouts may hold someone's work
 
-Both carry in-progress branches and uncommitted edits. Read `git status` before
-touching either, and leave branch switching, stashing and committing there to
+The user or another session may have a branch or uncommitted edits there. Read
+`git status` before touching either, and leave branch switching, stashing and committing there to
 the user unless they asked. Own work belongs in a worktree of that repo, linked
 with `--from`, rather than in the checkout itself.
 

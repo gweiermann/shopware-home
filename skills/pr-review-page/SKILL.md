@@ -57,5 +57,5 @@ Write `<img src>` as the absolute screenshot path, then make the file self-conta
 python3 <this skill's directory>/inline-images.py <scratchpad>/pr-<number>-review.html
 ```
 
-Send it with `SendUserFile` (`display: "render"`) and link its absolute path in the reply.
+Show it with the harness's file tool when it has one (Claude Code: `SendUserFile`, `display: "render"`) and link its absolute path in the reply.
 Done when the file opens with every image shown and no request leaving the file.
