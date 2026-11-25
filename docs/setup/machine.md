@@ -59,4 +59,4 @@ Shopware home (repos, setup, Shopware specifics for running, reviewing and babys
 
 ## Personal context
 
-Personal rules, preferences and per-repo patches stay out of this repo: in the global instruction files, the harness's memory, `~/.agents/babysit/preferences.md` for the PR skills, and `~/.agents/shopware-home/preferences.md` for the instances.
+Personal rules, preferences and per-repo patches stay out of this repo: in the global instruction files, the harness's memory, `~/.agents/github/preferences.md` for PR and issue defaults, `~/.agents/babysit/preferences.md` for babysitting, and `~/.agents/shopware-home/preferences.md` for the instances.

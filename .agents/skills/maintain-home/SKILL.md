@@ -16,7 +16,8 @@ Every change keeps it that way. Read the decisions below, then make the change s
 
    | What | Where |
    |---|---|
-   | Instances, PR defaults (labels, assignee) | `~/.agents/shopware-home/preferences.md` |
+   | Instances | `~/.agents/shopware-home/preferences.md` |
+   | PR and issue defaults (`pr-create`, `issue-create`) | `~/.agents/github/preferences.md` |
    | PR babysitting rules | `~/.agents/babysit/preferences.md` |
    | Harness settings for this repo (memory dir, `skillOverrides`, `claudeMdExcludes`) | `.claude/settings.local.json` (gitignored) |
    | Personal skills | `~/.agents/skills/<name>`, untracked |

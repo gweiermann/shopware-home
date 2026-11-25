@@ -38,7 +38,7 @@ Show one table: item → action (install, replace, keep theirs, leave out) → w
 Then ask for the answers the skills need, and whether to keep each for good or for this session only:
 
 - which repos to clone into `repositories/` (always fresh clones; existing checkouts elsewhere stay where they are), how many instances (three by default), whether they want one 6.7 and one 6.8 instance up at all times, and whether any instance is theirs to test in and must keep its data (all disposable is a fine answer);
-- PR defaults for `pr-create` (draft or ready, assignee, labels, description style) and babysitting (`babysit-pr` and `babysit-all-prs` ask their own questions; seed their answers from the old setup's rules);
+- PR and issue defaults (`pr-create`, `issue-create`) and babysitting (`babysit-pr`, `babysit-all-prs`): each skill asks its own questions on first use; seed their answers from the old setup's rules;
 - where sessions start (here, or still inside the repos) and what that costs them: [docs/setup/machine.md](../../docs/setup/machine.md), "Where sessions start";
 - the line pointing global instructions at the home repo.
 
